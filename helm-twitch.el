@@ -143,6 +143,9 @@ bound to HELM-PATTERN."
           (twitch-api-search-streams helm-pattern
                                      helm-twitch-candidate-number-limit)))
 
+(defvar helm-twitch--default-action nil
+  "Available `helm' default actions.")
+
 (defvar helm-twitch--stream-actions nil
   "Available `helm' actions for a stream.")
 
@@ -151,14 +154,20 @@ bound to HELM-PATTERN."
   (setq helm-twitch--stream-actions
          '(("Open this stream in a browser" .
             (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
- (when helm-twitch-enable-chat-actions
+  (when helm-twitch-enable-chat-actions
     (push '("Open Twitch chat for this channel" .
               (lambda (stream)
                 (twitch-api-open-chat (twitch-api-stream-name stream))))
           helm-twitch--stream-actions))
-(when helm-twitch-enable-streamlink-actions
-  (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
-        helm-twitch--stream-actions)))
+ (when helm-twitch-enable-streamlink-actions
+   (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
+         helm-twitch--stream-actions))
+ (when (and helm-twitch-enable-chat-actions helm-twitch-enable-streamlink-actions)
+   (push '("Open Twitch stream and chat for this channel" .
+           (lambda (stream)
+             helm-twitch--streamlink-open
+             (twitch-api-open-chat (twitch-api-stream-name stream))))
+         helm-twitch--stream-actions)))
 
 (defvar helm-twitch--top-streams-cache nil)
 (defvar helm-twitch--top-streams-cache-age nil)
@@ -214,6 +223,12 @@ bound to HELM-PATTERN."
           helm-twitch--following-actions))
   (when helm-twitch-enable-streamlink-actions
     (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
+          helm-twitch--following-actions))
+  (when (and helm-twitch-enable-chat-actions helm-twitch-enable-streamlink-actions)
+    (push '("Open Twitch stream and chat for this channel" .
+            (lambda (stream)
+              helm-twitch--streamlink-open
+              (twitch-api-open-chat (twitch-api-stream-name stream))))
           helm-twitch--following-actions)))
 
 (defun helm-twitch--channel-candidates ()
@@ -251,7 +266,7 @@ Twitch.tv API."
     :init (lambda () (helm-twitch--update-stream-actions))
     :candidates #'helm-twitch--stream-candidates
     :action 'helm-twitch--stream-actions
-    :persistent-help "Open this stream in a browser")
+    :persistent-help "Open this stream in streamlink")
   "A `helm' source for Twitch streams.")
 
 (defvar helm-source-twitch-top-streams
@@ -298,12 +313,6 @@ Twitch.tv API."
                (browse-url
                 (concat "http://www.twitch.tv/search?query=" query)))))
   "A `helm' source for searching Twitch's website directly.")
-
-;;;###autoload
-(defun helm-twitch-livestreamer ()
-  "Search for live Twitch.tv streams with `helm'."
-  (interactive)
-  )
 
 ;;;###autoload
 (defun helm-twitch ()
