@@ -164,9 +164,9 @@ bound to HELM-PATTERN."
          helm-twitch--stream-actions))
  (when (and helm-twitch-enable-chat-actions helm-twitch-enable-streamlink-actions)
    (push '("Open Twitch stream and chat for this channel" .
-           (lambda (stream)
-             helm-twitch--streamlink-open
-             (twitch-api-open-chat (twitch-api-stream-name stream))))
+           (lambda (stream) (
+             (helm-twitch--streamlink-open stream)
+             (twitch-api-open-chat (twitch-api-stream-name stream)))))
          helm-twitch--stream-actions)))
 
 (defvar helm-twitch--top-streams-cache nil)
@@ -226,9 +226,9 @@ bound to HELM-PATTERN."
           helm-twitch--following-actions))
   (when (and helm-twitch-enable-chat-actions helm-twitch-enable-streamlink-actions)
     (push '("Open Twitch stream and chat for this channel" .
-            (lambda (stream)
-              helm-twitch--streamlink-open
-              (twitch-api-open-chat (twitch-api-stream-name stream))))
+            (lambda (stream) (
+              (helm-twitch--streamlink-open stream)
+              (twitch-api-open-chat (twitch-api-stream-name stream)))))
           helm-twitch--following-actions)))
 
 (defun helm-twitch--channel-candidates ()
