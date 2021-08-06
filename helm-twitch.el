@@ -151,14 +151,14 @@ bound to HELM-PATTERN."
   (setq helm-twitch--stream-actions
          '(("Open this stream in a browser" .
             (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
-  (when helm-twitch-enable-streamlink-actions
-    (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
-          helm-twitch--stream-actions))
-  (when helm-twitch-enable-chat-actions
+ (when helm-twitch-enable-chat-actions
     (push '("Open Twitch chat for this channel" .
               (lambda (stream)
                 (twitch-api-open-chat (twitch-api-stream-name stream))))
-          helm-twitch--stream-actions)))
+          helm-twitch--stream-actions))
+(when helm-twitch-enable-streamlink-actions
+  (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
+        helm-twitch--stream-actions)))
 
 (defvar helm-twitch--top-streams-cache nil)
 (defvar helm-twitch--top-streams-cache-age nil)
@@ -205,17 +205,16 @@ bound to HELM-PATTERN."
 
 (defun helm-twitch--update-following-actions ()
   "Updates available `helm' actions for a followed stream."
-  (setq helm-twitch--following-actions nil)
-  (push '("Open this stream in a browser" .
-          (lambda (stream) (browse-url (twitch-api-stream-url stream))))
-        helm-twitch--following-actions)
-(when helm-twitch-enable-chat-actions
+  (setq helm-twitch--stream-actions
+        '(("Open this stream in a browser" .
+           (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
+  (when helm-twitch-enable-chat-actions
     (push '("Open Twitch chat for this channel" .
             (lambda (stream) (twitch-api-open-chat (twitch-api-stream-name stream))))
           helm-twitch--following-actions))
-(when helm-twitch-enable-streamlink-actions
-  (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
-        helm-twitch--following-actions)))
+  (when helm-twitch-enable-streamlink-actions
+    (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
+          helm-twitch--following-actions)))
 
 (defun helm-twitch--channel-candidates ()
   "Retrieve and format a list of channels that match whatever is
@@ -299,6 +298,12 @@ Twitch.tv API."
                (browse-url
                 (concat "http://www.twitch.tv/search?query=" query)))))
   "A `helm' source for searching Twitch's website directly.")
+
+;;;###autoload
+(defun helm-twitch-livestreamer ()
+  "Search for live Twitch.tv streams with `helm'."
+  (interactive)
+  )
 
 ;;;###autoload
 (defun helm-twitch ()
