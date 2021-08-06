@@ -205,17 +205,17 @@ bound to HELM-PATTERN."
 
 (defun helm-twitch--update-following-actions ()
   "Updates available `helm' actions for a followed stream."
-  (setq helm-twitch--following-actions
-         '(("Open this stream in a browser" .
-            (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
+  (setq helm-twitch--following-actions nil)
   (when helm-twitch-enable-streamlink-actions
     (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
           helm-twitch--following-actions))
-  (when helm-twitch-enable-chat-actions
+ (when helm-twitch-enable-chat-actions
     (push '("Open Twitch chat for this channel" .
-              (lambda (stream)
-                (twitch-api-open-chat (twitch-api-stream-name stream))))
-          helm-twitch--following-actions)))
+            (lambda (stream) (twitch-api-open-chat (twitch-api-stream-name stream))))
+          helm-twitch--following-actions))
+ (push '("Open this stream in a browser" .
+         (lambda (stream) (browse-url (twitch-api-stream-url stream))))
+       helm-twitch--following-actions))
 
 (defun helm-twitch--channel-candidates ()
   "Retrieve and format a list of channels that match whatever is
