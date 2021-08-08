@@ -32,7 +32,6 @@
 ;;; Code:
 
 (require 'helm)
-
 (require 'twitch-api)
 (require 'streamlink)
 
@@ -109,11 +108,6 @@ seconds."
         (streamlink-header-fn-args (list stream)))
     (streamlink-open (twitch-api-stream-url stream))))
 
-(defun helm-twitch--open-streamlink-chat (stream)
-  "Opens a Twitch.tv stream in `streamlink-mode'. And open chat."
-  (helm-twitch--streamlink-open stream)
-  (twitch-api-open-chat (twitch-api-stream-name stream)))
-
 (defun helm-twitch--format-stream (stream)
   "Given a `twitch-api-stream' STREAM, return a a formatted string
 suitable for display in a *helm-twitch* buffer."
@@ -160,17 +154,14 @@ bound to HELM-PATTERN."
          '(("Open this stream in a browser" .
             (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
   (when helm-twitch-enable-chat-actions
-    (push '("Open Twitch chat for this channel" .
+    (push '("Join this stream in Twitch irc channel" .
               (lambda (stream)
-                (twitch-api-open-chat (twitch-api-stream-name stream))))
+                (twitch-api-erc-join-channel (twitch-api-stream-name stream))))
           helm-twitch--stream-actions))
  (when helm-twitch-enable-streamlink-actions
    (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
          helm-twitch--stream-actions))
- (when (and helm-twitch-enable-chat-actions helm-twitch-enable-streamlink-actions)
-   (push '("Open Twitch stream and chat for this channel" .
-           helm-twitch--open-streamlink-chat)
-         helm-twitch--stream-actions)))
+ )
 
 (defvar helm-twitch--top-streams-cache nil)
 (defvar helm-twitch--top-streams-cache-age nil)
@@ -217,19 +208,16 @@ bound to HELM-PATTERN."
 
 (defun helm-twitch--update-following-actions ()
   "Updates available `helm' actions for a followed stream."
-  (setq helm-twitch--stream-actions
+  (setq helm-twitch--following-actions
         '(("Open this stream in a browser" .
            (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
   (when helm-twitch-enable-chat-actions
-    (push '("Open Twitch chat for this channel" .
-            (lambda (stream) (twitch-api-open-chat (twitch-api-stream-name stream))))
+    (push '("Join this stream in Twitch irc channel" .
+            (lambda (stream)
+              (twitch-api-erc-join-channel (twitch-api-stream-name stream))))
           helm-twitch--following-actions))
   (when helm-twitch-enable-streamlink-actions
     (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
-          helm-twitch--following-actions))
-  (when (and helm-twitch-enable-chat-actions helm-twitch-enable-streamlink-actions)
-    (push '("Open Twitch stream and chat for this channel" .
-            helm-twitch--open-streamlink-chat)
           helm-twitch--following-actions)))
 
 (defun helm-twitch--channel-candidates ()
