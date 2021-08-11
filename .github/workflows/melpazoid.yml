@@ -19,7 +19,7 @@ jobs:
         python -m pip install --upgrade pip
         sudo apt-get install emacs && emacs --version
         git clone https://github.com/BenediktBroich/twitch-api.git ~/twitch-api
-        cat '(load "~/twitch-api/twitch-api.el")'> ~/.emacs
+        echo '(load "~/twitch-api/twitch-api.el")' >> ~/.emacs
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
         pip install ~/melpazoid
     - name: Run
