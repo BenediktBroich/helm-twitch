@@ -1,12 +1,13 @@
-;;; helm-twitch.el --- Navigate Twitch.tv via `helm'.
+;;; helm-twitch.el --- Navigate Twitch.tv via `helm'
 
 ;; Copyright (C) 2015 Aaron Jacobs
 
 ;; Author: Aaron Jacobs <atheriel@gmail.com>
-;; URL: https://github.com/atheriel/helm-twitch
-;; Keywords: helm
+;; Author: Benedikt Broich <b.broich@posteo.de>
+;; URL: https://github.com/BenediktBroich/helm-twitch
+;; Keywords: helm, twitch, games
 ;; Version: 0
-;; Package-Requires: ((dash "2.11.0") (helm "1.5") (emacs "24"))
+;; Package-Requires: ((dash "2.11.0") (helm "1.5") (emacs "24") (twitch-api "20210809.1641"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -40,17 +41,16 @@
   :group 'convenience)
 
 (defcustom helm-twitch-candidate-number-limit 25
-  "The limit on the number of candidates `helm-twitch' will
-return from a single source. Note that there are significant
-performance costs to increasing this beyond 100 or so.
+  "The limit on number of candidates `helm-twitch' will return from a source.
+Note that there are significant performance costs to increasing this beyond
+100 or so.
 
-Similar to `helm-candidate-number-limit'."
+Similar to variable `helm-candidate-number-limit'."
   :group 'helm-twitch
   :type 'string)
 
 (defcustom helm-twitch-enable-streamlink-actions t
-  "Whether actions to use `streamlink-mode' should be
-available."
+  "Whether actions to use `streamlink-mode' should be available."
   :group 'helm-twitch
   :type 'boolean)
 
@@ -60,8 +60,7 @@ available."
   :type 'boolean)
 
 (defcustom helm-twitch-max-cache-age 60
-  "Oldest permissable cache age for `helm-twitch' API calls, in
-seconds."
+  "Oldest permissable cache age for `helm-twitch' API calls, in seconds."
   :group 'helm-twitch
   :type 'number)
 
@@ -86,7 +85,8 @@ seconds."
   :group 'helm-twitch)
 
 (defun helm-twitch--streamlink-header (stream)
-  "Provides a Twitch.tv header for `streamlink-mode'."
+  "Provides a Twitch.tv header for `streamlink-mode'.
+Argument STREAM streamer name."
   (concat
    (propertize "Twitch.tv:" 'face 'font-lock-variable-name-face)
    " "
@@ -103,14 +103,14 @@ seconds."
                'face 'helm-twitch-status-face)))
 
 (defun helm-twitch--streamlink-open (stream)
-  "Opens a Twitch.tv stream in `streamlink-mode'."
+  "Opens a Twitch.tv STREAM in `streamlink-mode'."
   (let ((streamlink-header-fn #'helm-twitch--streamlink-header)
         (streamlink-header-fn-args (list stream)))
     (streamlink-open (twitch-api-stream-url stream))))
 
 (defun helm-twitch--format-stream (stream)
-  "Given a `twitch-api-stream' STREAM, return a a formatted string
-suitable for display in a *helm-twitch* buffer."
+  "Given a `twitch-api-stream' STREAM.
+Return a a formatted string suitable for display in a *helm-twitch* buffer."
   (let* ((viewers (format "%7d" (twitch-api-stream-viewers stream)))
          (name    (format "%-16s" (twitch-api-stream-name stream)))
          (status (truncate-string-to-width
@@ -123,8 +123,8 @@ suitable for display in a *helm-twitch* buffer."
             (propertize status 'face 'helm-twitch-status-face))))
 
 (defun helm-twitch--format-channel (channel)
-  "Given a `twitch-api-channel' CHANNEL, return a a formatted string
-suitable for display in a *helm-twitch* buffer."
+  "Given a `twitch-api-channel' CHANNEL.
+Return a formatted string suitable for display in a *helm-twitch* buffer."
   (let* ((followers (format "%7d" (twitch-api-channel-followers channel)))
          (name      (format "%-16s" (twitch-api-channel-name channel)))
          (game      (format "%s" (or (twitch-api-channel-game channel) ""))))
@@ -136,8 +136,7 @@ suitable for display in a *helm-twitch* buffer."
             (propertize game 'face 'helm-twitch-status-face))))
 
 (defun helm-twitch--stream-candidates ()
-  "Retrieve and format a list of stream that match whatever is
-bound to HELM-PATTERN."
+  "Retrieve and format a list of stream that match whatever is bound to HELM-PATTERN."
   (mapcar (lambda (stream) (cons (helm-twitch--format-stream stream) stream))
           (twitch-api-search-streams helm-pattern
                                      helm-twitch-candidate-number-limit)))
@@ -149,7 +148,7 @@ bound to HELM-PATTERN."
   "Available `helm' actions for a stream.")
 
 (defun helm-twitch--update-stream-actions ()
-  "Updates available `helm' actions for a stream."
+  "Update available `helm' actions for a stream."
   (setq helm-twitch--stream-actions
          '(("Open this stream in a browser" .
             (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
@@ -160,8 +159,7 @@ bound to HELM-PATTERN."
           helm-twitch--stream-actions))
  (when helm-twitch-enable-streamlink-actions
    (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
-         helm-twitch--stream-actions))
- )
+         helm-twitch--stream-actions)))
 
 (defvar helm-twitch--top-streams-cache nil)
 (defvar helm-twitch--top-streams-cache-age nil)
@@ -207,7 +205,7 @@ bound to HELM-PATTERN."
   "Available `helm' actions for a followed stream.")
 
 (defun helm-twitch--update-following-actions ()
-  "Updates available `helm' actions for a followed stream."
+  "Update available `helm' actions for a followed stream."
   (setq helm-twitch--following-actions
         '(("Open this stream in a browser" .
            (lambda (stream) (browse-url (twitch-api-stream-url stream))))))
@@ -221,15 +219,13 @@ bound to HELM-PATTERN."
           helm-twitch--following-actions)))
 
 (defun helm-twitch--channel-candidates ()
-  "Retrieve and format a list of channels that match whatever is
-bound to HELM-PATTERN."
+  "Retrieve and format a list of channels that match whatever is bound to HELM-PATTERN."
   (mapcar (lambda (channel) (cons (helm-twitch--format-channel channel) channel))
           (twitch-api-search-channels helm-pattern
                                       helm-twitch-candidate-number-limit)))
 
 (defun helm-twitch--website-candidates ()
-  "Format whatever is bound to HELM-PATTERN as a `helm' candidate
-for searching Twitch.tv directly."
+  "Format whatever is bound to HELM-PATTERN as a `helm' candidate for searching Twitch.tv directly."
   (list (cons (concat (propertize "[?]" 'face 'helm-twitch-prefix-face)
                       " search "
                       (if (string= helm-pattern "")
@@ -239,14 +235,13 @@ for searching Twitch.tv directly."
               helm-pattern)))
 
 (defun helm-twitch-flush-cache ()
-  "Manually remove cached streams to force an update from the
-Twitch.tv API."
+  "Manually remove cached streams to force an update from the Twitch.tv API."
   (setq helm-twitch--following-cache-age nil
         helm-twitch--following-cache nil
         helm-twitch--top-streams-cache-age nil
         helm-twitch--top-streams-cache nil))
 
-(defvar helm-source-twitch
+(defvar helm-twitch-source-twitch
   (helm-build-sync-source "Live Streams"
     :header-name (lambda (src) (format "%s [%s]" src
                                        (or twitch-api-game-filter "All Games")))
@@ -258,7 +253,7 @@ Twitch.tv API."
     :persistent-help "Open this stream in streamlink")
   "A `helm' source for Twitch streams.")
 
-(defvar helm-source-twitch-top-streams
+(defvar helm-twitch-source-twitch-top-streams
   (helm-build-sync-source "Top Live Streams"
     :header-name (lambda (src) (format "%s [%s]" src
                                        (or twitch-api-game-filter "All Games")))
@@ -269,7 +264,7 @@ Twitch.tv API."
     :persistent-help "Open this stream in a browser")
   "A `helm' source for Twitch streams.")
 
-(defvar helm-source-twitch-following
+(defvar helm-twitch-source-twitch-following
   (helm-build-sync-source "Live Followed Streams"
     :volatile t
     :init (lambda () (helm-twitch--update-following-actions))
@@ -277,7 +272,7 @@ Twitch.tv API."
     :action 'helm-twitch--following-actions)
   "A `helm' source for Twitch streams the user is following.")
 
-(defvar helm-source-twitch-channels
+(defvar helm-twitch-source-twitch-channels
   (helm-build-sync-source "Channels"
     :volatile t
     ;; The Twitch.tv API seems to require at least three characters for channel
@@ -292,7 +287,7 @@ Twitch.tv API."
                (twitch-api-open-chat (twitch-api-channel-name channel)))))
   "A `helm' source for Twitch channels.")
 
-(defvar helm-source-twitch-website
+(defvar helm-twitch-source-twitch-website
   (helm-build-sync-source "Search Twitch.tv directly"
     :volatile t
     :candidates #'helm-twitch--website-candidates
@@ -307,12 +302,12 @@ Twitch.tv API."
 (defun helm-twitch ()
   "Search for live Twitch.tv streams with `helm'."
   (interactive)
-  (let* ((sources '(helm-source-twitch
-                    helm-source-twitch-top-streams
-                    helm-source-twitch-channels
-                    helm-source-twitch-website))
+  (let* ((sources '(helm-twitch-source-twitch
+                    helm-twitch-source-twitch-top-streams
+                    helm-twitch-source-twitch-channels
+                    helm-twitch-source-twitch-website))
          (sources (if twitch-api-oauth-token
-                      (append '(helm-source-twitch-following)
+                      (append '(helm-twitch-source-twitch-following)
                               sources)
                     sources)))
     (helm-other-buffer sources "*helm-twitch*")))

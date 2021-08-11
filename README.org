@@ -1,0 +1,2 @@
+* helm-twitch.el
+  Navigate Twitch.tv via `helm'.
