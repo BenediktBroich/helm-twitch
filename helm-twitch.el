@@ -7,7 +7,7 @@
 ;; URL: https://github.com/BenediktBroich/helm-twitch
 ;; Keywords: helm, twitch, games
 ;; Version: 0
-;; Package-Requires: ((dash "2.11.0") (helm "1.5") (emacs "24") (twitch-api "20210809.1641"))
+;; Package-Requires: ((dash "2.11.0") (helm "1.5") (emacs "24") (twitch-api "20210809.1641") (streamlink "0"))
 
 ;; This file is NOT part of GNU Emacs.
 
