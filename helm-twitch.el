@@ -7,7 +7,7 @@
 ;; URL: https://github.com/BenediktBroich/helm-twitch
 ;; Keywords: helm, twitch, games
 ;; Version: 0
-;; Package-Requires: ((dash "2.11.0") (helm "1.5") (emacs "24") (twitch-api "20210809.1641") (streamlink "0"))
+;; Package-Requires: ((dash "2.11.0") (helm "1.5") (emacs "24") (twitch-api "20210809.1641") (streamlink "20210811.1429"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -284,7 +284,7 @@ Return a formatted string suitable for display in a *helm-twitch* buffer."
              (lambda (channel) (browse-url (twitch-api-channel-url channel)))
              "Open Twitch chat for this channel"
              (lambda (channel)
-               (twitch-api-open-chat (twitch-api-channel-name channel)))))
+               (twitch-api-erc-join-channel (twitch-api-channel-name channel)))))
   "A `helm' source for Twitch channels.")
 
 (defvar helm-twitch-source-twitch-website
