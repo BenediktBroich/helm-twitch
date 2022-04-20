@@ -155,7 +155,7 @@ Return a formatted string suitable for display in a *helm-twitch* buffer."
   (when helm-twitch-enable-chat-actions
     (push '("Join this stream in Twitch irc channel" .
               (lambda (stream)
-                (twitch-api-erc-join-channel (twitch-api-stream-name stream))))
+                (twitch-api-erc-join-channel stream)))
           helm-twitch--stream-actions))
  (when helm-twitch-enable-streamlink-actions
    (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
@@ -212,7 +212,7 @@ Return a formatted string suitable for display in a *helm-twitch* buffer."
   (when helm-twitch-enable-chat-actions
     (push '("Join this stream in Twitch irc channel" .
             (lambda (stream)
-              (twitch-api-erc-join-channel (twitch-api-stream-name stream))))
+              (twitch-api-erc-join-channel stream)))
           helm-twitch--following-actions))
   (when helm-twitch-enable-streamlink-actions
     (push '("Open this stream in Streamlink" . helm-twitch--streamlink-open)
@@ -284,7 +284,7 @@ Return a formatted string suitable for display in a *helm-twitch* buffer."
              (lambda (channel) (browse-url (twitch-api-channel-url channel)))
              "Open Twitch chat for this channel"
              (lambda (channel)
-               (twitch-api-erc-join-channel (twitch-api-channel-name channel)))))
+               (twitch-api-erc-join-channel channel))))
   "A `helm' source for Twitch channels.")
 
 (defvar helm-twitch-source-twitch-website
